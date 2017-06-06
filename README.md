@@ -16,6 +16,8 @@ The API routes are accessible under the `hostname/api/<current-version>` URL nam
 
 An access token can be obtained by loggin in and can be used on a request by specifying the Authorization header with the value: `Bearer <token>`.
 
+Responses have the structure `{status, message, errors}`, where the `errors` prop is provided whenever the `status` denotes an HTTP error status.
+
 * `/user`
   * `POST /` - Create a new user
     * Request: `{firstName, lastName, username, password}`
