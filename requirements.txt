@@ -15,6 +15,7 @@ multidict==2.1.6
 neo4j-driver==1.1.0
 neomodel==3.2.2
 psycopg2==2.7.1
+PyJWT==1.5.0
 python-dateutil==2.6.0
 pytz==2016.10
 six==1.10.0
