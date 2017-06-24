@@ -1,0 +1,26 @@
+version: '3'
+services:
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend_docker
+    links:
+      - relational_db
+    volumes:
+      - ".:/tidbit:z"
+    ports:
+      - 8000:80
+    env_file:
+      - backend.env
+
+  relational_db:
+    image: postgres:9.6.3
+    volumes:
+      - "./db/etc/:/etc/postgresql"
+      - "./db/log/:/var/log/postgresql"
+      - "./db/data/:/var/lib/postgresql"
+    expose:
+      - "5432"
+    env_file:
+      - relational_db.env

@@ -1,0 +1,9 @@
+FROM python:3.6.0
+MAINTAINER Alastair Paragas <alastairparagas@gmail.com>
+
+ADD server.py /tidbit/
+ADD requirements.txt /tidbit/
+ADD ./app /tidbit/app
+
+RUN pip3 install -r /tidbit/requirements.txt
+CMD ["python", "/tidbit/server.py"]
