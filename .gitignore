@@ -2,3 +2,5 @@
 .python-version
 .venv/*
 *.pyc
+backend.env
+relational_db.env
