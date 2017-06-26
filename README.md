@@ -44,7 +44,7 @@ Responses have the structure `{status, message, errors}`, where the `errors` pro
 The following entities exist in the database and represented in a normalized and relational fashion into a relational database.
 
 * user
-  * id - int
+  * id - uuid
   * first_name - text
   * last_name - text
   * username - varchar(30)
@@ -52,7 +52,7 @@ The following entities exist in the database and represented in a normalized and
   * joined_at - timestamptz
   * last_login_at - timestamptz
 * history
-  * id - int
+  * id - uuid
   * user_id - foreign(user, id)
   * document_id - foreign(document, id)
   * accessed_at - timestamp
@@ -61,4 +61,4 @@ The following entities exist in the database and represented in a normalized and
   * user_id - foreign(user, id)
   * url - text
   * contents - text
-  * crawled_at - timestamp
+  * summarized_at - timestamp
