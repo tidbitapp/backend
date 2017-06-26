@@ -3,7 +3,7 @@ import psycopg2
 from typing import Union
 from cerberus import Validator
 from .utils import session_token
-from .db.user import UserRepository
+from .db.UserRepository import UserRepository
 
 
 def get_request_session_token(request: Request) -> Union[str, None]:
@@ -51,10 +51,12 @@ async def create(request: Request) -> Response:
     'password': {'required': True, 'type': 'string'}
   })
 
-  request_body = await request.json()
-  if not (request.has_body and validator.validate(
-      request_body
-  )):
+  try:
+    request_body = await request.json()
+  except:
+    request_body = None
+
+  if not validator.validate(request_body):
     return json_response(
       status=400,
       data={
@@ -67,7 +69,7 @@ async def create(request: Request) -> Response:
 
   try:
     user = UserRepository(request.app['db_pool'])
-    user.create(UserRepository.UserCreate(
+    await user.create(UserRepository.UserCreate(
       request_body.get('firstName'), request_body.get('lastName'),
       request_body.get('username'), request_body.get('password')
     ))
@@ -77,7 +79,7 @@ async def create(request: Request) -> Response:
       data={
         'status': 400,
         'message': 'Could not create user',
-        'errors': error
+        'errors': str(error)
       }
     )
 
@@ -96,7 +98,7 @@ async def get(request: Request) -> Response:
   :return: Coroutine object that returns aiohttp.web.Response
   """
   string_token = get_request_session_token(request)
-  user_id = int(request.match_info['user_id'])
+  user_id = request.match_info['user_id']
   user = UserRepository(request.app['db_pool'])
 
   if has_access_right(string_token, user_id) is False:
@@ -144,7 +146,7 @@ async def get(request: Request) -> Response:
       data={
         'status': 400,
         'message': 'Could not grab user information',
-        'errors': error
+        'errors': str(error)
       }
     )
 
@@ -189,10 +191,12 @@ async def update(request: Request) -> Response:
     'password': {'type': 'string'}
   })
 
-  request_body = await request.json()
-  if not (request.has_body and validator.validate(
-    request_body
-  )):
+  try:
+    request_body = await request.json()
+  except:
+    request_body = None
+
+  if not validator.validate(request_body):
     return json_response(
       status=400,
       data={
@@ -204,7 +208,7 @@ async def update(request: Request) -> Response:
     )
 
   user_token = get_request_session_token(request)
-  user_id = int(request.match_info['user_id'])
+  user_id = request.match_info['user_id']
   user = UserRepository(request.app['db_pool'])
 
   if has_access_right(user_token, user_id) is False:
@@ -227,7 +231,7 @@ async def update(request: Request) -> Response:
       data={
         'status': 400,
         'message': 'Could not update user',
-        'errors': error
+        'errors': str(error)
       }
     )
 
@@ -246,7 +250,7 @@ async def delete(request: Request) -> Response:
   :return: Coroutine object that returns aiohttp.web.Response
   """
   user_token = get_request_session_token(request)
-  user_id = int(request.match_info['user_id'])
+  user_id = request.match_info['user_id']
   user = UserRepository(request.app['db_pool'])
 
   if has_access_right(user_token, user_id) is False:
@@ -266,7 +270,7 @@ async def delete(request: Request) -> Response:
       data={
         'status': 400,
         'message': 'Could not delete user',
-        'errors': error
+        'errors': str(error)
       }
     )
 

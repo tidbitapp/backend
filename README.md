@@ -45,18 +45,20 @@ The following entities exist in the database and represented in a normalized and
 
 * user
   * id - int
-  * firstName - text
-  * lastName - text
-  * username - text
-  * password - bytea
-  * joinedAt - timestamp
-  * lastLoginAt - timestamp
+  * first_name - text
+  * last_name - text
+  * username - varchar(30)
+  * password - varchar(30)
+  * joined_at - timestamptz
+  * last_login_at - timestamptz
 * history
   * id - int
-  * userId - foreign(user, id)
-  * documentId - foreign(document, id)
-  * accessedAt - timestamp
+  * user_id - foreign(user, id)
+  * document_id - foreign(document, id)
+  * accessed_at - timestamp
 * document
   * id - int
+  * user_id - foreign(user, id)
   * url - text
-  * crawledAt - timestamp
+  * contents - text
+  * crawled_at - timestamp

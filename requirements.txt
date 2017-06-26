@@ -1,5 +1,6 @@
 aiohttp==2.1.0
 aiopg==0.13.0
+aitertools==0.1.0
 aniso8601==1.2.0
 async-timeout==1.2.1
 asynctest==0.10.0

@@ -1,14 +1,20 @@
 from asynctest import TestCase, MagicMock, CoroutineMock
-from aiopg import Pool, Cursor
-from app.db.user import UserRepository
+from aiopg import Pool, Cursor, Connection
+from app.db.UserRepository import UserRepository
 from datetime import datetime
 
 
 class UserRepositoryTest(TestCase):
 
   mock_cursor = MagicMock(Cursor)
+  mock_connection = MagicMock(Connection)
+  mock_connection.cursor = CoroutineMock(
+    return_value=mock_cursor
+  )
   postgres_pool_mock = MagicMock(Pool)
-  postgres_pool_mock.acquire = CoroutineMock(return_value=mock_cursor)
+  postgres_pool_mock.acquire = CoroutineMock(
+    return_value=mock_connection
+  )
 
   async def tearDown(self):
     self.mock_cursor.reset_mock()
@@ -101,7 +107,7 @@ class UserRepositoryTest(TestCase):
     self.mock_cursor.fetchone = CoroutineMock(return_value=None)
 
     user = UserRepository(self.postgres_pool_mock)
-    obtained_user = await user.getby_id_public(1)
+    obtained_user = await user.getby_id_public('1')
 
     self.postgres_pool_mock.acquire.assert_called_once()
     self.postgres_pool_mock.release.assert_called_once()
@@ -117,20 +123,25 @@ class UserRepositoryTest(TestCase):
 
     )
 
-    history = [("someUrl", datetime.now())]
-    self.mock_cursor.fetchall = CoroutineMock(return_value=history)
+    history_object = ("someUrl", datetime.now())
+    mock = CoroutineMock()
+    mock.side_effect = [history_object, None]
+    self.mock_cursor.fetchone = mock
 
     user = UserRepository(self.postgres_pool_mock)
     user.getby_id_public = CoroutineMock(
       return_value=returned_user
     )
-    obtained_user = await user.getby_id_private(1)
+    obtained_user = await user.getby_id_private('1')
 
     self.postgres_pool_mock.acquire.assert_called_once()
     self.postgres_pool_mock.release.assert_called_once()
     self.mock_cursor.execute.assert_called_once()
-    self.mock_cursor.fetchall.assert_called_once()
+    self.assertEqual(
+      self.mock_cursor.fetchone.call_count,
+      2
+    )
     user.getby_id_public.assert_called_once()
 
     self.assertIsInstance(obtained_user, UserRepository.UserPrivateView)
-    self.assertIs(obtained_user.history, history)
+    self.assertListEqual(obtained_user.history, [history_object])
