@@ -19,7 +19,7 @@ def get_request_session_token(request: Request) -> Union[str, None]:
   return authorization_header.replace('Bearer ', '')
 
 
-def has_access_right(string_token: Union[str, None], user_id: int) -> bool:
+def has_access_right(string_token: Union[str, None], user_id: str) -> bool:
   """
   Provided the current session, does a user have permission to
   private information of the user he/she is trying to access?
@@ -32,7 +32,7 @@ def has_access_right(string_token: Union[str, None], user_id: int) -> bool:
   session = session_token.get_contents(string_token)
   if session is None:
     return False
-  if user_id != int(session.get('user_id')):
+  if user_id != session.get('user_id'):
     return False
 
   return True
