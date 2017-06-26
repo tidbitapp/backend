@@ -145,3 +145,43 @@ class UserRepositoryTest(TestCase):
 
     self.assertIsInstance(obtained_user, UserRepository.UserPrivateView)
     self.assertListEqual(obtained_user.history, [history_object])
+
+  async def test_getbycredentials_exists(self):
+    sample_id = 'id-sample1'
+    sample_username = 'username-sample1'
+    sample_last_login_at = datetime.now()
+    self.mock_cursor.fetchone = CoroutineMock(
+      return_value=(
+        sample_id, sample_username, sample_last_login_at
+      )
+    )
+
+    user = UserRepository(self.postgres_pool_mock)
+    obtained_user = await user.getby_credentials(
+      "someUsername",
+      "somePassword"
+    )
+
+    self.assertEqual(obtained_user.user_id, sample_id)
+    self.assertEqual(obtained_user.username, sample_username)
+    self.assertEqual(
+      obtained_user.last_login_at,
+      sample_last_login_at
+    )
+
+  async def test_getbycredentials_notexists(self):
+    self.mock_cursor.fetchone = CoroutineMock(
+      return_value=None
+    )
+
+    user = UserRepository(self.postgres_pool_mock)
+    with self.assertRaises(UserRepository.AuthError):
+      await user.getby_credentials(
+        "someUsername",
+        "somePassword"
+      )
+
+    self.postgres_pool_mock.acquire.assert_called_once()
+    self.postgres_pool_mock.release.assert_called_once()
+    self.mock_cursor.execute.assert_called_once()
+    self.mock_cursor.fetchone.assert_called_once()

@@ -48,6 +48,14 @@ class UserRepository:
     last_login_at: datetime
     history: List[Tuple[str, datetime]]
 
+  class UserCredentialView(NamedTuple):
+    user_id: str
+    username: str
+    last_login_at: datetime
+
+  class AuthError(BaseException):
+    pass
+
   def __init__(self, pool: aiopg.Pool):
     self.pool = pool
 
@@ -57,7 +65,7 @@ class UserRepository:
       query=
       'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";'
       'CREATE TABLE "user"('
-      'id UUID DEFAULT uuid_generate_v4(),'
+      ' id UUID DEFAULT uuid_generate_v4(),'
       ' first_name TEXT           NOT NULL,'
       ' last_name TEXT            NOT NULL,'
       ' username VARCHAR(30)      NOT NULL UNIQUE,'
@@ -162,6 +170,31 @@ class UserRepository:
       await aitertools.alist(history_list_raw)
     )
     return self.UserPrivateView(*params)
+
+  async def getby_credentials(
+      self,
+      username: str,
+      password: str
+  ) -> UserCredentialView:
+    datasource_generator = utils.query_with_result(
+      pool=self.pool,
+      query=
+      'SELECT id, username, last_login_at '
+      'FROM "user"'
+      'WHERE username=%s AND password=%s',
+      query_tuple=(username, password)
+    )
+
+    user_raw = await aitertools.anext(
+      datasource_generator,
+      None
+    )
+    await datasource_generator.aclose()
+
+    if user_raw is None:
+      raise self.AuthError("Could not authenticate user")
+
+    return self.UserCredentialView(*user_raw)
 
   async def deleteby_id(self, user_id: str) -> None:
     await utils.query(
