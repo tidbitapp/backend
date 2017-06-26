@@ -10,7 +10,7 @@ services:
     volumes:
       - ".:/tidbit:z"
     ports:
-      - 8000:80
+      - "8000:80"
     env_file:
       - backend.env
 

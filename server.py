@@ -1,10 +1,12 @@
 import aiohttp.web
+from os import getenv
 import app.UserController as User
 from app.AuthenticateController import authenticate
 from app.SummaryController import summarize
 from app.db.startup import on_startup as db_on_startup
+from app.db.cleanup import on_cleanup as db_on_cleanup
 
-async def index() -> aiohttp.web.Response:
+async def index(_: aiohttp.web.Request) -> aiohttp.web.Response:
   return aiohttp.web.Response(
     text="Welcome to Tidbit Backend API",
     status=200
@@ -21,5 +23,9 @@ app.router.add_post(path="/authenticate", handler=authenticate)
 app.router.add_post(path="/summary", handler=summarize)
 
 app.on_startup.append(db_on_startup)
+app.on_cleanup.append(db_on_cleanup)
 
-aiohttp.web.run_app(app)
+aiohttp.web.run_app(
+  app,
+  port=int(getenv('BACKEND_PORT', '80'))
+)
