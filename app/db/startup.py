@@ -2,7 +2,9 @@ from aiohttp.web import Application
 import aiopg
 from os import getenv
 from asyncio import sleep
-from .user import UserRepository
+from .UserRepository import UserRepository
+from .HistoryRepository import HistoryRepository
+from .DocumentRepository import DocumentRepository
 
 async def on_startup(app: Application):
 
@@ -28,5 +30,7 @@ async def on_startup(app: Application):
   )
 
   await UserRepository(db_pool).startup()
+  await DocumentRepository(db_pool).startup()
+  await HistoryRepository(db_pool).startup()
 
   app['db_pool'] = db_pool
