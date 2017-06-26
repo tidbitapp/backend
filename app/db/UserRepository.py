@@ -69,7 +69,7 @@ class UserRepository:
       ' first_name TEXT           NOT NULL,'
       ' last_name TEXT            NOT NULL,'
       ' username VARCHAR(30)      NOT NULL UNIQUE,'
-      ' password VARCHAR(30)      NOT NULL,'
+      ' password VARCHAR(100)     NOT NULL,'
       ' joined_at TIMESTAMPTZ     NOT NULL,'
       ' last_login_at TIMESTAMPTZ NOT NULL,'
       ' PRIMARY KEY (id)'
