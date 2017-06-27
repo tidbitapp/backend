@@ -59,17 +59,17 @@ The following entities exist in the database and represented in a normalized and
   * first_name - text
   * last_name - text
   * username - varchar(30)
-  * password - varchar(30)
+  * password - varchar(100)
   * joined_at - timestamptz
   * last_login_at - timestamptz
 * history
   * id - uuid
   * user_id - foreign(user, id)
   * document_id - foreign(document, id)
-  * accessed_at - timestamp
+  * accessed_at - timestamptz
 * document
   * id - int
   * user_id - foreign(user, id)
   * url - text
   * contents - text
-  * summarized_at - timestamp
+  * summarized_at - timestamptz
