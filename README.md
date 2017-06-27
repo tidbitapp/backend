@@ -11,6 +11,17 @@ TidBit is a document summarization application, currently with a Chrome extensio
 * 📈 **Neo4J** - Graph-based database
 * 📁 **HDFS** - Distributed Filesystem
 
+## Getting Started
+Make sure to have Docker and Docker-Compose installed. Then, follow through the following steps:
+1. `cd` to the base of the project directory
+2. Rename `backend_sample.env` and `relational_db_sample.env` to `backend.env` and `relational_db.env`
+3. Fill in the appropriate information in both `backend.env` and `relational_db.env`, making sure to specify all values accordingly
+4. Run `docker-compose build`
+5. Run `docker-compose up` and now, you should be able to access the API routes at the localhost or whatever hostname your copy of Docker is working on!
+6. To shut containers down, run `docker-compose down`
+
+When you update the source code, you will have to run `docker-compose down` followed by `docker-compose up` again. These commands must always be executed at the base of the project directory!
+
 ## API Routes
 The API routes are accessible under the `hostname/api/<current-version>` URL namespace. Output is in JSON format.
 
