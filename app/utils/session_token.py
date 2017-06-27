@@ -14,7 +14,9 @@ def create(payload: dict) -> str:
   jwt_secret = getenv('JWT_SECRET')
   payload['exp'] = datetime_future(24)
 
-  return jwt.encode(payload, jwt_secret, algorithm='HS256')
+  return jwt.encode(payload, jwt_secret, algorithm='HS256').decode(
+    'utf-8'
+  )
 
 
 def get_contents(token: str) -> Union[dict, None]:

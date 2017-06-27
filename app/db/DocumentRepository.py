@@ -11,11 +11,12 @@ class DocumentRepository:
     await utils.query(
       pool=self.pool,
       query=
-      'CREATE TABLE history('
+      'CREATE TABLE document('
       ' id UUID DEFAULT uuid_generate_v4(),'
       ' user_id UUID              NOT NULL REFERENCES "user",'
       ' url TEXT                  NOT NULL,'
       ' contents TEXT             NOT NULL,'
       ' summarized_at TIMESTAMPTZ NOT NULL,'
+      ' PRIMARY KEY (id)'
       ');'
     )

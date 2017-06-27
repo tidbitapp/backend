@@ -16,7 +16,7 @@ async def on_startup(app: Application):
   if not (db_name and db_username and db_password and db_host):
     raise RuntimeError('DB environment variables not set!')
 
-  await sleep(15)
+  await sleep(10)
 
   dsn = 'dbname={} user={} password={} host={}'.format(
     getenv('POSTGRES_DB_NAME'),

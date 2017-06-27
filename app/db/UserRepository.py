@@ -98,10 +98,10 @@ class UserRepository:
       pool=self.pool,
       query=
       'UPDATE "user" '
-      'SET first_name=COALESCE(first_ame, %s),'
-      ' last_name=COALESCE(last_name, %s), '
-      ' username=COALESCE(username, %s), '
-      ' password=COALESCE(password, %s) '
+      'SET first_name=COALESCE(%s, first_name),'
+      ' last_name=COALESCE(%s, last_name), '
+      ' username=COALESCE(%s, username), '
+      ' password=COALESCE(%s, password) '
       'WHERE id=%s '
       'RETURNING'
       ' first_name, last_name, username,'
@@ -132,9 +132,7 @@ class UserRepository:
       ' joined_at, last_login_at '
       'FROM "user" '
       'WHERE id=%s',
-      query_tuple=(
-        user_id,
-      )
+      query_tuple=(user_id,)
     )
 
     user_raw = await aitertools.anext(
@@ -161,7 +159,7 @@ class UserRepository:
       'SELECT document.url, history.accessed_at '
       'FROM history, document '
       'WHERE history.user_id=%s'
-      ' AND history.document_id == document.id',
+      ' AND history.document_id = document.id',
       query_tuple=(user_id,)
     )
 
@@ -169,6 +167,8 @@ class UserRepository:
     params.append(
       await aitertools.alist(history_list_raw)
     )
+    await history_list_raw.aclose()
+
     return self.UserPrivateView(*params)
 
   async def getby_credentials(
@@ -194,7 +194,19 @@ class UserRepository:
     if user_raw is None:
       raise self.AuthError("Could not authenticate user")
 
-    return self.UserCredentialView(*user_raw)
+    current_time = datetime.now(tz=pytz.timezone('US/Eastern'))
+    await utils.query(
+      pool=self.pool,
+      query=
+      'UPDATE "user" '
+      'SET last_login_at=%s '
+      'WHERE id=%s',
+      query_tuple=(current_time, user_raw[0])
+    )
+
+    return self.UserCredentialView(
+      str(user_raw[0]), user_raw[1], user_raw[2]
+    )
 
   async def deleteby_id(self, user_id: str) -> None:
     await utils.query(

@@ -16,5 +16,6 @@ class HistoryRepository:
       ' user_id UUID            NOT NULL REFERENCES "user",'
       ' document_id UUID        NOT NULL UNIQUE REFERENCES document,'
       ' accessed_at TIMESTAMPTZ NOT NULL,'
+      ' PRIMARY KEY (id)'
       ');'
     )

@@ -132,8 +132,8 @@ async def get(request: Request) -> Response:
           'firstName': obtained_user.first_name,
           'lastName': obtained_user.last_name,
           'username': obtained_user.username,
-          'joinedAt': obtained_user.joined_at,
-          'lastLoginAt': obtained_user.last_login_at
+          'joinedAt': obtained_user.joined_at.isoformat(),
+          'lastLoginAt': obtained_user.last_login_at.isoformat()
         }
       }
     )
@@ -168,8 +168,8 @@ async def get(request: Request) -> Response:
         'firstName': obtained_user.first_name,
         'lastName': obtained_user.last_name,
         'username': obtained_user.username,
-        'joinedAt': obtained_user.joined_at,
-        'lastLoginAt': obtained_user.last_login_at,
+        'joinedAt': obtained_user.joined_at.isoformat(),
+        'lastLoginAt': obtained_user.last_login_at.isoformat(),
         'history': list(map(lambda history_tuple: {
           'url': history_tuple[0],
           'accessedAt': history_tuple[1]

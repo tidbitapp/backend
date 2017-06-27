@@ -33,7 +33,7 @@ async def authenticate(request: Request) -> Response:
       request_body.get('username'),
       request_body.get('password')
     )
-  except (psycopg2.error, UserRepository.AuthError) as error:
+  except (psycopg2.Error, UserRepository.AuthError) as error:
     return json_response(
       status=400,
       data={
@@ -46,7 +46,7 @@ async def authenticate(request: Request) -> Response:
   token = session_token.create({
     'user_id': obtained_user.user_id,
     'username': obtained_user.username,
-    'last_login_at': obtained_user.last_login_at
+    'last_login_at': obtained_user.last_login_at.isoformat()
   })
 
   return json_response(
