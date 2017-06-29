@@ -1,3 +1,5 @@
+*~
+
 .idea/*
 .python-version
 .venv/*
@@ -7,3 +9,6 @@ relational_db.env
 .DS_Store
 db/*
 
+/* DB sensitive info */
+backend.env
+relational_dv.env
