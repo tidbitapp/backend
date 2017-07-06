@@ -22,3 +22,4 @@ pytz==2016.10
 six==1.10.0
 Werkzeug==0.12.1
 yarl==0.10.2
+beautifulsoup4==4.6.0
