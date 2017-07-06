@@ -2,7 +2,7 @@ import aiohttp.web
 from os import getenv
 import app.UserController as User
 from app.AuthenticateController import authenticate
-from app.SummaryController import summarize
+import app.SummaryController as Summary
 from app.db.startup import on_startup as db_on_startup
 from app.db.cleanup import on_cleanup as db_on_cleanup
 
@@ -20,7 +20,8 @@ app.router.add_get(path="/user/{user_id}", handler=User.get)
 app.router.add_post(path="/user/{user_id}", handler=User.update)
 app.router.add_delete(path="/user/{user_id}", handler=User.delete)
 app.router.add_post(path="/authenticate", handler=authenticate)
-app.router.add_post(path="/summary", handler=summarize)
+app.router.add_post(path="/summary", handler=Summary.summarize)
+app.router.add_get(path="/summary/types", handler=Summary.get_summarizer_types)
 
 app.on_startup.append(db_on_startup)
 app.on_cleanup.append(db_on_cleanup)
