@@ -172,7 +172,7 @@ async def get(request: Request) -> Response:
         'lastLoginAt': obtained_user.last_login_at.isoformat(),
         'history': list(map(lambda history_tuple: {
           'url': history_tuple[0],
-          'accessedAt': history_tuple[1]
+          'accessedAt': str(history_tuple[1])
         }, obtained_user.history))
       }
     }

@@ -11,7 +11,13 @@ class HistoryRepository:
   class HistoryCreate(NamedTuple):
     user_id: str
     document_id: str
-    summarizer_type:str
+    summarizer_type: str
+    
+  class HistoryView(NamedTuple):
+    user_id: str
+    document_id: str
+    summarizer_type: str
+    accessed_at: datetime
 
   def __init__(self, pool: aiopg.Pool):
     self.pool = pool
