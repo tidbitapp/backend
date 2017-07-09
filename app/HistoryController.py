@@ -3,7 +3,6 @@ import psycopg2
 from typing import Union
 from cerberus import Validator
 from .utils import session_token
-from .db.UserRepository import UserRepository
 from .db.DocumentRepository import DocumentRepository
 from .db.HistoryRepository import HistoryRepository
 import app.UserController as UserController

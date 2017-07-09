@@ -62,7 +62,6 @@ async def summarize(request: Request) -> Response:
   """
   
   validator = Validator({
-    'user_id': {'required': True, 'type': 'string'},
     'url': {'required': True, 'type': 'string'},
     'domContent': {'required': True, 'type': 'string'},
     'summarizerType': {'required': True, 'type': 'string'}
@@ -85,10 +84,19 @@ async def summarize(request: Request) -> Response:
       }
     )
   
-  """
-  TODO make sure that the user that is requesting the summarization is logged in
-   """
-   
+  # Ensure that the user is logged
+  string_token = UserController.get_request_session_token(request)
+  user_id = request.match_info['user_id']
+
+  if UserController.has_access_right(string_token, user_id) is False:
+    return json_response(
+        status=404,
+        data={
+          'status': 404,
+          'message': 'The user must be logged in to access his or her history.'
+        }
+      )
+     
   # Extract the text of the document from the DOM content
   text = extract_text_from_html(request_body.get('domContent'))
    
@@ -103,7 +111,8 @@ async def summarize(request: Request) -> Response:
         'errors': 'The given summarizer type is not valid.'
       }
     )
-	  
+  
+  # Summarize the text
   summary = Summarizer.summarize(text, summarizer_type)
   
   # Check whether this Document has been summarized before.
@@ -114,7 +123,7 @@ async def summarize(request: Request) -> Response:
   if new_doc is None:
     try:
       new_doc = await doc.create(DocumentRepository.DocumentCreate(
-        request_body.get('user_id'), request_body.get('url'),
+        user_id, request_body.get('url'),
         request_body.get('domContent')
       ))
     except psycopg2.Error as error:
@@ -132,7 +141,7 @@ async def summarize(request: Request) -> Response:
   try:
     hist = HistoryRepository(request.app['db_pool'])
     await hist.create(HistoryRepository.HistoryCreate(
-      request_body.get('user_id'), new_doc.document_id, 
+      user_id, new_doc.document_id, 
       summarizer_type
     ))
   except psycopg2.Error as error:

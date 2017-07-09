@@ -34,7 +34,7 @@ Responses have the structure `{status, message, errors}`, where the `errors` pro
     * Request: `{firstName, lastName, username, password}`
   * `GET /{userId}` - Get information about the user
     * With appropriate token:
-      * Response: `{firstName, lastName, username, joinedAt, lastLoginAt, history: [{url, accessedAt}]}`
+      * Response: `{firstName, lastName, username, joinedAt, lastLoginAt, history: [{url, accessedAt, summarizer_type}]}`
     * Without token:
       * Response: `{firstName, lastName, username, joinedAt, lastLoginAt}`
   * `POST /{userId}` - Update information about the user
@@ -42,14 +42,22 @@ Responses have the structure `{status, message, errors}`, where the `errors` pro
     * Request: `{firstName, lastName, username, password}`
   * `DELETE /{userId}` - Delete the user
     * Requires appropriate token
+  * `POST /{user_id}/summary` - Get a summary for the provided webpage contents
+    * Request: `{url, domContent, summarizerType}`
+    * Response: `{summary, summarizerType}`
+    * Requires appropriate token
+  * `GET /{user_id}/history` - Get a history of the documents this user has summarized
+    * Request: `None`
+    * Response: `{history: [{url, accessedAt, summarizer_type}]}`
+    * Requires appropriate token
 * `/authenticate`
   * `POST /` - Login with provided credentials and obtain a token
     * Request: `{username, password}`
     * Response: `{token}`
 * `/summary`
-  * `POST /` - Get a summary for the provided webpage contents
-    * Request: `{url, domContent}`
-    * Response: `{summary}`
+  * `GET /types` - Returns a list of the available summarization algorithms.
+    * Request: None
+    * Response: `{summarizerTypes}`
 
 ## Relational Schema
 The following entities exist in the database and represented in a normalized and relational fashion into a relational database.
