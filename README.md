@@ -74,6 +74,7 @@ The following entities exist in the database and represented in a normalized and
   * id - uuid
   * user_id - foreign(user, id)
   * document_id - foreign(document, id)
+  * summarizer_type - text
   * accessed_at - timestamptz
 * document
   * id - int
