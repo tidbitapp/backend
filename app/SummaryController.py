@@ -96,6 +96,7 @@ async def summarize(request: Request) -> Response:
           'message': 'The user must be logged in to access his or her history.'
         }
       )
+
      
   # Extract the text of the document from the DOM content
   text = extract_text_from_html(request_body.get('domContent'))
