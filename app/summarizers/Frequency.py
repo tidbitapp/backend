@@ -1,7 +1,7 @@
 from operator import itemgetter
 from . import utils
 
-NUM_SUMMARIZED_SENTENCES = 3
+NUM_SUMMARIZED_SENTENCES = 5
 MIN_SENTENCE_LENGTH = 5
 
 def freq_summarize(text, num_summarized_sentences):

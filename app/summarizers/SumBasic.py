@@ -1,7 +1,7 @@
 from operator import itemgetter
 import re
 
-NUM_SUMMARIZED_SENTENCES = 3
+NUM_SUMMARIZED_SENTENCES = 5
 MIN_SENTENCE_LENGTH = 5
 from . import utils
 

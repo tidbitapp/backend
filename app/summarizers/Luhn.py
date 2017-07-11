@@ -4,9 +4,9 @@ import sys
 from . import utils
 
 FILE_STOP_WORD_LIST = "stop-word-list.txt"
-MIN_FREQ = 0.001
+MIN_FREQ = 0.00001
 MAX_FREQ = 0.5
-NUM_SUMMARIZED_SENTENCES = 3
+NUM_SUMMARIZED_SENTENCES = 5
 MIN_SENTENCE_LENGTH = 5
 
 # Returns the stop word list
@@ -37,7 +37,7 @@ def get_significant_words(word_freq, stop_words):
 
 # Returns the score of a sentence
 def calc_sentence_score(sentence, significant_words):
-  if len(sentence.strip('.!?,()\n')) < MIN_SENTENCE_LENGTH:
+  if len(sentence.split()) < MIN_SENTENCE_LENGTH:
     return 0.0
 
   num_important_words = 0

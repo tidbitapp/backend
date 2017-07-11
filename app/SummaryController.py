@@ -9,6 +9,9 @@ from .db.HistoryRepository import HistoryRepository
 import app.UserController as UserController
 from .summarizers import Summarizer
 from bs4 import BeautifulSoup
+import urllib.request
+from readability import readability
+
 
 def extract_text_from_html(html: Union[str, None]) -> str:
   """
@@ -31,9 +34,17 @@ def extract_text_from_html(html: Union[str, None]) -> str:
   # Break multi-headlines into individual lines
   chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
   # Remove all blank lines
-  text = '\n'.join(chunk for chunk in chunks if chunk)
+  text = ' '.join(chunk for chunk in chunks if chunk)
   
   return text
+  
+def extract_article(url: Union[str, None]) -> str:
+  page = urllib.request.urlopen(url)
+  html = page.read()
+
+  article = readability.Document(html).summary()
+  
+  return extract_text_from_html(article)
   
 async def get_summarizer_types(request: Request) -> Response:
   """
@@ -88,18 +99,27 @@ async def summarize(request: Request) -> Response:
   string_token = UserController.get_request_session_token(request)
   user_id = request.match_info['user_id']
 
-  if UserController.has_access_right(string_token, user_id) is False:
+  """if UserController.has_access_right(string_token, user_id) is False:
     return json_response(
         status=404,
         data={
           'status': 404,
           'message': 'The user must be logged in to access his or her history.'
         }
-      )
-
-     
+      )"""
+  
   # Extract the text of the document from the DOM content
-  text = extract_text_from_html(request_body.get('domContent'))
+  try:
+    text = extract_article(request_body.get('url'))
+  except urllib.error.HTTPError as error:
+    return json_response(
+      status=400,
+      data={
+        'status': 400,
+        'message': 'Could not access the web page through the given URL.',
+        'errors': str(error)
+      }
+    )
    
   # Summarize the document 
   summarizer_type = request_body.get('summarizerType')
@@ -162,7 +182,7 @@ async def summarize(request: Request) -> Response:
       'message': 'Summarization was successful',
       'data': {
 		'summarizerType': summarizer_type,
-        'summary': str(summary)
+        'summary': summary
       }
     }
   )
