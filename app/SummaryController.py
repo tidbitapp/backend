@@ -99,14 +99,14 @@ async def summarize(request: Request) -> Response:
   string_token = UserController.get_request_session_token(request)
   user_id = request.match_info['user_id']
 
-  """if UserController.has_access_right(string_token, user_id) is False:
+  if UserController.has_access_right(string_token, user_id) is False:
     return json_response(
         status=404,
         data={
           'status': 404,
           'message': 'The user must be logged in to access his or her history.'
         }
-      )"""
+      )
   
   # Extract the text of the document from the DOM content
   try:
