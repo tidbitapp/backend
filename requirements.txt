@@ -23,3 +23,4 @@ six==1.10.0
 Werkzeug==0.12.1
 yarl==0.10.2
 beautifulsoup4==4.6.0
+readability-lxml==0.6.2
