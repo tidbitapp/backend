@@ -55,6 +55,8 @@ Responses have the structure `{status, message, errors}`, where the `errors` pro
     * Request: `{username, password}`
     * Response: `{token}`
 * `/summary`
+  * `POST /` - Get a summary of the page content
+    * Request: `{url, domContent:optional, summarizerType}`
   * `GET /types` - Returns a list of the available summarization algorithms.
     * Request: None
     * Response: `{summarizerTypes}`
