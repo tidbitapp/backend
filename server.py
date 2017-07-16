@@ -1,5 +1,7 @@
 import aiohttp.web
 from os import getenv
+import aiohttp_cors
+
 import app.UserController as User
 from app.AuthenticateController import authenticate
 import app.SummaryController as Summary
@@ -14,16 +16,23 @@ async def index(_: aiohttp.web.Request) -> aiohttp.web.Response:
   )
 
 app = aiohttp.web.Application()
+cors = aiohttp_cors.setup(app, defaults={
+  "*": aiohttp_cors.ResourceOptions(
+    allow_credentials=True,
+    expose_headers="*",
+    allow_headers="*",
+  )
+})
 
-app.router.add_route(method="*", path="/", handler=index)
-app.router.add_post(path="/user", handler=User.create)
-app.router.add_get(path="/user/{user_id}", handler=User.get)
-app.router.add_post(path="/user/{user_id}", handler=User.update)
-app.router.add_delete(path="/user/{user_id}", handler=User.delete)
-app.router.add_post(path="/authenticate", handler=authenticate)
-app.router.add_post(path="/summary", handler=Summary.summarize)
-app.router.add_get(path="/summary/types", handler=Summary.get_summarizer_types)
-app.router.add_get(path="/user/{user_id}/history", handler=History.index)
+cors.add(app.router.add_route(method="*", path="/", handler=index))
+cors.add(app.router.add_post(path="/user", handler=User.create))
+cors.add(app.router.add_get(path="/user/{user_id}", handler=User.get))
+cors.add(app.router.add_post(path="/user/{user_id}", handler=User.update))
+cors.add(app.router.add_delete(path="/user/{user_id}", handler=User.delete))
+cors.add(app.router.add_post(path="/authenticate", handler=authenticate))
+cors.add(app.router.add_post(path="/summary", handler=Summary.summarize))
+cors.add(app.router.add_get(path="/summary/types", handler=Summary.get_summarizer_types))
+cors.add(app.router.add_get(path="/user/{user_id}/history", handler=History.index))
 
 app.on_startup.append(db_on_startup)
 app.on_cleanup.append(db_on_cleanup)
