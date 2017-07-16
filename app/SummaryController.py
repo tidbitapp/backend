@@ -1,12 +1,11 @@
+from .db.DocumentRepository import DocumentRepository
+from .db.HistoryRepository import HistoryRepository
+from .utils import auth, session_token
+
 from aiohttp.web import Request, Response, json_response
 import psycopg2
 from typing import Union
 from cerberus import Validator
-from .utils import session_token
-from .db.UserRepository import UserRepository
-from .db.DocumentRepository import DocumentRepository
-from .db.HistoryRepository import HistoryRepository
-import app.UserController as UserController
 from .summarizers import Summarizer
 from bs4 import BeautifulSoup
 import urllib.request
@@ -59,8 +58,8 @@ async def get_summarizer_types(request: Request) -> Response:
       'status': 200,
       'message': 'The following are the available summarizer types.',
       'data': {
-      'summarizerTypes': str(Summarizer.SUMMARIZER_TYPES)
-     }
+        'summarizerTypes': str(Summarizer.SUMMARIZER_TYPES)
+      }
     }
   )
   
@@ -74,7 +73,7 @@ async def summarize(request: Request) -> Response:
   
   validator = Validator({
     'url': {'required': True, 'type': 'string'},
-    'domContent': {'required': True, 'type': 'string'},
+    'domContent': {'required': False, 'type': 'string'},
     'summarizerType': {'required': True, 'type': 'string'}
   })
 
@@ -88,18 +87,16 @@ async def summarize(request: Request) -> Response:
       status=400,
       data={
         'status': 400,
-        'message': 'Payload must be JSON with user ID, URL of document, '
-                   'DOM content of the document\'s website and the type of'
+        'message': 'Payload must be JSON with URL of document, '
+                   'DOM content of the document\'s website and the type of '
                    'summarizer',
         'errors': validator.errors
       }
     )
   
-  # Ensure that the user is logged
-  string_token = UserController.get_request_session_token(request)
-  user_id = request.match_info['user_id']
-
-  if UserController.has_access_right(string_token, user_id) is False:
+  # Ensure that the user is logged in
+  string_token = auth.get_request_session_token(request)
+  if string_token is None:
     return json_response(
         status=404,
         data={
@@ -107,10 +104,14 @@ async def summarize(request: Request) -> Response:
           'message': 'The user must be logged in to access his or her history.'
         }
       )
+  token = session_token.get_contents(string_token)
   
   # Extract the text of the document from the DOM content
   try:
-    text = extract_article(request_body.get('url'))
+    if request_body.get('domContent'):
+      text = request_body.get('domContent')
+    else:
+      text = extract_article(request_body.get('url'))
   except urllib.error.HTTPError as error:
     return json_response(
       status=400,
@@ -144,8 +145,9 @@ async def summarize(request: Request) -> Response:
   if new_doc is None:
     try:
       new_doc = await doc.create(DocumentRepository.DocumentCreate(
-        user_id, request_body.get('url'),
-        request_body.get('domContent')
+        token.get('user_id'),
+        request_body.get('url'),
+        text
       ))
     except psycopg2.Error as error:
       return json_response(
@@ -162,7 +164,8 @@ async def summarize(request: Request) -> Response:
   try:
     hist = HistoryRepository(request.app['db_pool'])
     await hist.create(HistoryRepository.HistoryCreate(
-      user_id, new_doc.document_id, 
+      token.get('user_id'),
+      new_doc.document_id,
       summarizer_type
     ))
   except psycopg2.Error as error:
@@ -181,7 +184,7 @@ async def summarize(request: Request) -> Response:
       'status': 200,
       'message': 'Summarization was successful',
       'data': {
-		'summarizerType': summarizer_type,
+        'summarizerType': summarizer_type,
         'summary': summary
       }
     }
