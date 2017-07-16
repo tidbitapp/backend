@@ -7,7 +7,7 @@ from . import utils
 
 
 class DocumentRepository:
-	
+
   class DocumentCreate(NamedTuple):
     user_id: str
     url: str
