@@ -38,6 +38,9 @@ class UserRepository:
     password: str
     joined_at: datetime
     last_login_at: datetime
+    
+  class UserHistoryView(NamedTuple):
+    history: List[Tuple[str, str, datetime]]
 
   class UserPrivateView(NamedTuple):
     first_name: str
@@ -170,6 +173,28 @@ class UserRepository:
     await history_list_raw.aclose()
 
     return self.UserPrivateView(*params)
+    
+  async def get_history_by_id(self, user_id: str) -> Union[
+    UserHistoryView, None
+  ]:
+	  
+    history_list_raw  = utils.query_with_result(
+      pool=self.pool,
+      query=
+      'SELECT document.url, history.summarizer_type, history.accessed_at '
+      'FROM history, document '
+      'WHERE history.user_id=%s'
+      ' AND history.document_id = document.id',
+      query_tuple=(user_id,)
+    )
+
+    params = []
+    params.append(
+      await aitertools.alist(history_list_raw)
+    )
+    await history_list_raw.aclose()
+
+    return self.UserHistoryView(*params)
 
   async def getby_credentials(
       self,

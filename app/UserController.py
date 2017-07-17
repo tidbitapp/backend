@@ -1,41 +1,9 @@
 from aiohttp.web import Request, Response, json_response
 import psycopg2
-from typing import Union
+
 from cerberus import Validator
-from .utils import session_token
+from .utils import auth
 from .db.UserRepository import UserRepository
-
-
-def get_request_session_token(request: Request) -> Union[str, None]:
-  """
-  Get session token from request
-  :param request: aiohttp.web.Request
-  :return: session token
-  """
-  authorization_header = request.headers.get('Authorization')
-  if authorization_header is None:
-    return None
-
-  return authorization_header.replace('Bearer ', '')
-
-
-def has_access_right(string_token: Union[str, None], user_id: str) -> bool:
-  """
-  Provided the current session, does a user have permission to
-  private information of the user he/she is trying to access?
-  :param string_token: session representation
-  :param user_id: id of user being accessed
-  :return: TRUE if he/she has permission, FALSE otherwise
-  """
-  if string_token is None:
-    return False
-  session = session_token.get_contents(string_token)
-  if session is None:
-    return False
-  if user_id != session.get('user_id'):
-    return False
-
-  return True
 
 
 async def create(request: Request) -> Response:
@@ -97,11 +65,11 @@ async def get(request: Request) -> Response:
   :param request: aiohttp.web.Request
   :return: Coroutine object that returns aiohttp.web.Response
   """
-  string_token = get_request_session_token(request)
+  string_token = auth.get_request_session_token(request)
   user_id = request.match_info['user_id']
   user = UserRepository(request.app['db_pool'])
 
-  if has_access_right(string_token, user_id) is False:
+  if auth.has_access_right(string_token, user_id) is False:
     try:
       obtained_user = await user.getby_id_public(user_id)
     except psycopg2.Error as error:
@@ -172,7 +140,7 @@ async def get(request: Request) -> Response:
         'lastLoginAt': obtained_user.last_login_at.isoformat(),
         'history': list(map(lambda history_tuple: {
           'url': history_tuple[0],
-          'accessedAt': history_tuple[1]
+          'accessedAt': str(history_tuple[1])
         }, obtained_user.history))
       }
     }
@@ -207,11 +175,11 @@ async def update(request: Request) -> Response:
       }
     )
 
-  user_token = get_request_session_token(request)
+  user_token = auth.get_request_session_token(request)
   user_id = request.match_info['user_id']
   user = UserRepository(request.app['db_pool'])
 
-  if has_access_right(user_token, user_id) is False:
+  if auth.has_access_right(user_token, user_id) is False:
     return json_response(
       status=400,
       data={
@@ -249,11 +217,11 @@ async def delete(request: Request) -> Response:
   :param request: aiohttp.web.Request
   :return: Coroutine object that returns aiohttp.web.Response
   """
-  user_token = get_request_session_token(request)
+  user_token = auth.get_request_session_token(request)
   user_id = request.match_info['user_id']
   user = UserRepository(request.app['db_pool'])
 
-  if has_access_right(user_token, user_id) is False:
+  if auth.has_access_right(user_token, user_id) is False:
     return json_response(
       status=400,
       data={
