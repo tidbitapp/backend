@@ -1,5 +1,5 @@
 # 📋 TidBit (Backend)
-> Backend API Router for TidBit
+> Backend API for TidBit
 
 TidBit is a document summarization application, currently with a Chrome extension front-end. When you hit the TidBit button on the Chrome extension, it will try to summarize and get the gist out of the webpage.
 
